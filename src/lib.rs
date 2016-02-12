@@ -90,14 +90,18 @@ impl PsDecoder {
         Ok(())
     }
 
-    pub fn get_hyp(&self) -> Option<(String, String, i32)> {
+    pub fn get_hyp(&self) -> Option<(String, Option<String>, i32)> {
         let mut score: i32 = 0;
         let mut c_utt_id: *const c_char = ptr::null();
         let c_hyp = unsafe { bindings::ps_get_hyp(self.raw, &mut score, &mut c_utt_id) };
         if c_hyp.is_null() { return None; }
 
         let hyp = unsafe { CStr::from_ptr(c_hyp) }.to_string_lossy().into_owned();
-        let utt_id = unsafe { CStr::from_ptr(c_utt_id) }.to_string_lossy().into_owned();
+        let utt_id = if c_utt_id.is_null() {
+            None
+        } else {
+            Some(unsafe { CStr::from_ptr(c_utt_id) }.to_string_lossy().into_owned())
+        };
         Some((hyp, utt_id, score))
     }
 }
