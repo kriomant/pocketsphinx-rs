@@ -6,6 +6,10 @@ use std::ffi::{CStr, CString};
 use std::mem;
 use libc::c_char;
 
+pub use search::*;
+
+mod search;
+
 pub struct CmdLn {
     raw: *mut bindings::cmd_ln_t,
 
@@ -103,6 +107,10 @@ impl PsDecoder {
             Some(unsafe { CStr::from_ptr(c_utt_id) }.to_string_lossy().into_owned())
         };
         Some((hyp, utt_id, score))
+    }
+
+    pub fn searches(&self) -> Searches {
+        Searches::new(self.raw)
     }
 }
 

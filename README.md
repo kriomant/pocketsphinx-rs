@@ -18,7 +18,8 @@ sudo apt-get install libpocketsphinx1
 On OS X, install `cmu-pocketsphinx` with Homebrew:
 
 ```
-brew install cmu-pocketsphinx
+brew install --HEAD cmu-sphinxbase
+brew install --HEAD cmu-pocketsphinx
 ```
 
 For building custom version of CMU PocketSphinx refer to
