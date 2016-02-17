@@ -7,8 +7,10 @@ use std::mem;
 use libc::c_char;
 
 pub use search::*;
+pub use nbest::*;
 
 mod search;
+mod nbest;
 
 pub struct CmdLn {
     raw: *mut bindings::cmd_ln_t,
@@ -107,6 +109,36 @@ impl PsDecoder {
             Some(unsafe { CStr::from_ptr(c_utt_id) }.to_string_lossy().into_owned())
         };
         Some((hyp, utt_id, score))
+    }
+
+    pub fn get_in_speech(&self) -> bool {
+        let res = unsafe { bindings::ps_get_in_speech(self.raw) };
+        res == 1
+    }
+
+    pub fn get_prob(&self) -> i32 {
+        unsafe { bindings::ps_get_prob(self.raw) }
+    }
+
+    pub fn nbest(&self, start_frame: i32, end_frame: i32,
+                 ctx1: Option<&str>, ctx2: Option<&str>) -> NBestIter {
+        let c_ctx1 = ctx1.map(|s| CString::new(s).unwrap());
+        let c_ctx2 = ctx2.map(|s| CString::new(s).unwrap());
+        let raw_nbest = unsafe {
+            bindings::ps_nbest(self.raw, start_frame, end_frame,
+                               c_ctx1.map_or(ptr::null(), |c| c.as_ptr()),
+                               c_ctx2.map_or(ptr::null(), |c| c.as_ptr()))
+        };
+        NBestIter::new(raw_nbest)
+    }
+
+    pub fn nbest_simple(&self) -> NBestIter {
+        self.nbest(0, -1, None, None)
+    }
+
+    pub fn seg_iter(&self) -> SegIter {
+        let mut best_score: i32 = 0;
+        SegIter::new(unsafe { bindings::ps_seg_iter(self.raw, &mut best_score) })
     }
 
     pub fn searches(&self) -> Searches {
