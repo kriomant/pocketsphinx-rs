@@ -32,7 +32,7 @@ Add `pocketsphinx` as a dependency in `Cargo.toml`:
 
 ```toml
 [dependencies]
-pocketsphinx = "0.1.0"
+pocketsphinx = "0.3.1"
 ```
 
 Import the `pocketsphinx` crate, initialize *PocketSphinx* decoder:
