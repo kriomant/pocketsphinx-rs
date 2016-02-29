@@ -8,9 +8,11 @@ use libc::c_char;
 
 pub use search::*;
 pub use nbest::*;
+pub use jsgf::*;
 
 mod search;
 mod nbest;
+mod jsgf;
 
 pub struct CmdLn {
     raw: *mut bindings::cmd_ln_t,

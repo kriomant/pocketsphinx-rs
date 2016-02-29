@@ -1,6 +1,6 @@
 [package]
 name = "pocketsphinx"
-version = "0.3.1"
+version = "0.4.0"
 authors = ["Mikhail Trishchenkov <kriomant@gmail.com>"]
 
 description = "Rust wrapper for libpocketsphinx"
@@ -12,4 +12,4 @@ keywords = ["pocketsphinx", "voice", "recognition", "audio"]
 
 [dependencies]
 libc = "0.2.4"
-pocketsphinx-sys = "0.3.*"
+pocketsphinx-sys = "0.4.*"
