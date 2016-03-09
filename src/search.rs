@@ -7,6 +7,7 @@ use libc::c_int;
 use std::os::unix::ffi::OsStrExt;
 
 use super::PsDecoder;
+use super::{Error, Result};
 
 pub struct Searches<'a> {
     raw: *mut bindings::ps_search_iter_t,
@@ -43,27 +44,27 @@ impl<'a> Iterator for Searches<'a> {
 }
 
 pub trait PsDecoderSearchExt {
-    fn set_search(&mut self, name: &str) -> Result<(), ()>;
+    fn set_search(&mut self, name: &str) -> Result<()>;
     fn get_search(&self) -> Option<&str>;
-    fn unset_search(&mut self, name: &str) -> Result<(), ()>;
-    fn set_lm_file(&mut self, name: &str, path: &OsStr) -> Result<(), ()>;
-    fn set_jsgf_file(&mut self, name: &str, path: &OsStr) -> Result<(), ()>;
-    fn set_jsgf_string(&mut self, name: &str, jsgf_string: &str) -> Result<(), ()>;
-    fn ps_set_kws(&mut self, name: &str, keyfile: &OsStr) -> Result<(), ()>;
-    fn set_keyphrase(&mut self, name: &str, keyphrase: &str) -> Result<(), ()>;
-    fn set_allphone_file(&mut self, name: &str, path: &OsStr) -> Result<(), ()>;
+    fn unset_search(&mut self, name: &str) -> Result<()>;
+    fn set_lm_file(&mut self, name: &str, path: &OsStr) -> Result<()>;
+    fn set_jsgf_file(&mut self, name: &str, path: &OsStr) -> Result<()>;
+    fn set_jsgf_string(&mut self, name: &str, jsgf_string: &str) -> Result<()>;
+    fn ps_set_kws(&mut self, name: &str, keyfile: &OsStr) -> Result<()>;
+    fn set_keyphrase(&mut self, name: &str, keyphrase: &str) -> Result<()>;
+    fn set_allphone_file(&mut self, name: &str, path: &OsStr) -> Result<()>;
 }
 
-fn check_res(res: c_int) -> Result<(), ()> {
+fn check_res(res: c_int) -> Result<()> {
     match res {
         0 => Ok(()),
-        -1 => Err(()),
+        -1 => Err(Error),
         _ => unreachable!(),
     }
 }
 
 impl PsDecoderSearchExt for PsDecoder {
-    fn set_search(&mut self, name: &str) -> Result<(), ()> {
+    fn set_search(&mut self, name: &str) -> Result<()> {
         let name_cstr = CString::new(name).unwrap();
         check_res(unsafe { bindings::ps_set_search(self.raw, name_cstr.as_ptr()) })
     }
@@ -77,18 +78,18 @@ impl PsDecoderSearchExt for PsDecoder {
         }
     }
 
-    fn unset_search(&mut self, name: &str) -> Result<(), ()> {
+    fn unset_search(&mut self, name: &str) -> Result<()> {
         let name_cstr = CString::new(name).unwrap();
         check_res(unsafe { bindings::ps_unset_search(self.raw, name_cstr.as_ptr()) })
     }
 
-    fn set_lm_file(&mut self, name: &str, path: &OsStr) -> Result<(), ()> {
+    fn set_lm_file(&mut self, name: &str, path: &OsStr) -> Result<()> {
         let name_c = CString::new(name).unwrap();
         let path_c = CString::new(path.as_bytes()).unwrap();
         check_res(unsafe { bindings::ps_set_lm_file(self.raw, name_c.as_ptr(), path_c.as_ptr()) })
     }
 
-    fn set_jsgf_file(&mut self, name: &str, path: &OsStr) -> Result<(), ()> {
+    fn set_jsgf_file(&mut self, name: &str, path: &OsStr) -> Result<()> {
         let name_c = CString::new(name).unwrap();
         let path_c = CString::new(path.as_bytes()).unwrap();
         check_res(unsafe {
@@ -96,7 +97,7 @@ impl PsDecoderSearchExt for PsDecoder {
         })
     }
 
-    fn set_jsgf_string(&mut self, name: &str, jsgf_string: &str) -> Result<(), ()> {
+    fn set_jsgf_string(&mut self, name: &str, jsgf_string: &str) -> Result<()> {
         let name_c = CString::new(name).unwrap();
         let jsgf_string_c = CString::new(jsgf_string).unwrap();
         check_res(unsafe {
@@ -104,14 +105,14 @@ impl PsDecoderSearchExt for PsDecoder {
         })
     }
 
-    fn ps_set_kws(&mut self, name: &str, keyfile: &OsStr) -> Result<(), ()> {
+    fn ps_set_kws(&mut self, name: &str, keyfile: &OsStr) -> Result<()> {
         let name_c = CString::new(name).unwrap();
         let keyfile_c = CString::new(keyfile.as_bytes()).unwrap();
         check_res(unsafe {
             bindings::ps_set_kws(self.raw, name_c.as_ptr(), keyfile_c.as_ptr())
         })
     }
-    fn set_keyphrase(&mut self, name: &str, keyphrase: &str) -> Result<(), ()> {
+    fn set_keyphrase(&mut self, name: &str, keyphrase: &str) -> Result<()> {
         let name_c = CString::new(name).unwrap();
         let keyphrase_c = CString::new(keyphrase).unwrap();
         check_res(unsafe {
@@ -119,7 +120,7 @@ impl PsDecoderSearchExt for PsDecoder {
         })
     }
 
-    fn set_allphone_file(&mut self, name: &str, path: &OsStr) -> Result<(), ()> {
+    fn set_allphone_file(&mut self, name: &str, path: &OsStr) -> Result<()> {
         let name_c = CString::new(name).unwrap();
         let path_c = CString::new(path.as_bytes()).unwrap();
         check_res(unsafe {

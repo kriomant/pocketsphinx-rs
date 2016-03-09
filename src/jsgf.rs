@@ -6,6 +6,8 @@ use std::ffi::{CStr, CString, OsStr};
 
 use std::os::unix::ffi::OsStrExt;
 
+use super::{Error, Result};
+
 pub mod internal {
     use std;
     use bindings;
@@ -193,21 +195,21 @@ pub struct Jsgf {
 }
 
 impl Jsgf {
-    pub fn parse_file(filename: &OsStr) -> Result<Self, ()> {
+    pub fn parse_file(filename: &OsStr) -> Result<Self> {
         let filename_c = CString::new(filename.as_bytes()).unwrap();
         let raw = unsafe { bindings::jsgf_parse_file(filename_c.as_ptr(), ptr::null()) };
         if raw.is_null() {
-            Err(())
+            Err(Error)
         } else {
             Ok(Jsgf { raw: raw })
         }
     }
 
-    pub fn parse_string(s: &str) -> Result<Self, ()> {
+    pub fn parse_string(s: &str) -> Result<Self> {
         let s_c = CString::new(s.as_bytes()).unwrap();
         let raw = unsafe { bindings::jsgf_parse_string(s_c.as_ptr(), ptr::null()) };
         if raw.is_null() {
-            Err(())
+            Err(Error)
         } else {
             Ok(Jsgf { raw: raw })
         }

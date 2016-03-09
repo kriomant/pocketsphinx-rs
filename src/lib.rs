@@ -9,10 +9,12 @@ use libc::c_char;
 pub use search::*;
 pub use nbest::*;
 pub use jsgf::*;
+pub use error::*;
 
 mod search;
 mod nbest;
 mod jsgf;
+mod error;
 
 pub struct CmdLn {
     raw: *mut bindings::cmd_ln_t,
@@ -24,7 +26,7 @@ pub struct CmdLn {
 }
 
 impl CmdLn {
-    pub fn init(strict: bool, args: &[&str]) -> Option<Self> {
+    pub fn init(strict: bool, args: &[&str]) -> Result<Self> {
         // Sphinx assumes that `args` are valid as long as returned
         // `cmd_ln_t` is alive, so copy them.
         let c_args: Vec<_> = args.iter().map(|s| CString::new(*s).unwrap()).collect();
@@ -37,9 +39,9 @@ impl CmdLn {
                                      strict as i32)
         };
         if raw.is_null() {
-            return None;
+            return Err(Error);
         }
-        Some(CmdLn{raw: raw, args: c_args})
+        Ok(CmdLn{raw: raw, args: c_args})
     }
 
     fn into_raw(mut self) -> *mut bindings::cmd_ln_t {
@@ -67,7 +69,7 @@ impl PsDecoder {
         PsDecoder{raw: raw}
     }
 
-    pub fn start_utt(&self, utt_id: Option<&str>) -> std::result::Result<(), ()>  {
+    pub fn start_utt(&self, utt_id: Option<&str>) -> Result<()>  {
         let (_id_cstr, id_ptr) = utt_id.map_or_else(
             ||  { (CString::new("").unwrap(), ptr::null()) },
             |s| {
@@ -77,24 +79,24 @@ impl PsDecoder {
             }
         );
         let code = unsafe { bindings::ps_start_utt(self.raw, id_ptr) };
-        if code == 0 { Ok(()) } else { Err(()) }
+        if code == 0 { Ok(()) } else { Err(Error) }
     }
 
     pub fn process_raw(&self,
                        data: &[i16],
                        no_search: bool,
-                       full_utt: bool) -> std::result::Result<i32, ()> {
+                       full_utt: bool) -> Result<i32> {
         let frames = unsafe {
             bindings::ps_process_raw(self.raw, data.as_ptr(), data.len(),
                                      no_search as i32, full_utt as i32)
         };
-        if frames < 0 { return Err(()); }
+        if frames < 0 { return Err(Error); }
         Ok(frames)
     }
 
-    pub fn end_utt(&self) -> std::result::Result<(), ()> {
+    pub fn end_utt(&self) -> Result<()> {
         let code = unsafe { bindings::ps_end_utt(self.raw) };
-        if code < 0 { return Err(()); }
+        if code < 0 { return Err(Error); }
         Ok(())
     }
 
