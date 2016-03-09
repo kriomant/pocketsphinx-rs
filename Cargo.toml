@@ -1,6 +1,6 @@
 [package]
 name = "pocketsphinx"
-version = "0.4.0"
+version = "0.5.0"
 authors = ["Mikhail Trishchenkov <kriomant@gmail.com>"]
 
 description = "Rust wrapper for libpocketsphinx"
