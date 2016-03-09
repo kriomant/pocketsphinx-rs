@@ -39,7 +39,6 @@ pub mod internal {
     }
 
     #[derive(Clone)]
-    #[allow(raw_pointer_derive)]
     pub struct Atom<'a> {
         raw: *const bindings::internal::jsgf_atom_t,
         _marker: std::marker::PhantomData<&'a str>,
@@ -60,7 +59,6 @@ pub mod internal {
     }
 
     #[derive(Clone)]
-    #[allow(raw_pointer_derive)]
     pub struct Atoms<'a> {
         node: bindings::glist_t,
         _marker: std::marker::PhantomData<&'a str>,
@@ -89,7 +87,6 @@ pub mod internal {
     }
 
     #[derive(Clone)]
-    #[allow(raw_pointer_derive)]
     pub struct Alternatives<'a> {
         node: *const bindings::internal::jsgf_rhs_t,
         _marker: std::marker::PhantomData<&'a str>,
@@ -116,7 +113,6 @@ pub mod internal {
     }
 
     #[derive(Clone)]
-    #[allow(raw_pointer_derive)]
     pub struct RuleData<'a> {
         raw: *const bindings::internal::jsgf_rule_s,
         _marker: std::marker::PhantomData<&'a super::Jsgf>,
@@ -134,7 +130,6 @@ pub mod internal {
 }
 
 #[derive(Clone)]
-#[allow(raw_pointer_derive)]
 pub struct Rule<'a> {
     raw: *const bindings::jsgf_rule_t,
     _marker: std::marker::PhantomData<&'a str>,
