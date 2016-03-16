@@ -27,7 +27,7 @@ impl<'a> Seg<'a> {
         probs
     }
 
-    pub fn word(&self) -> &str {
+    pub fn word(&self) -> &'a str {
         let c_word = unsafe { bindings::ps_seg_word(self.raw) };
         unsafe { CStr::from_ptr(c_word) }.to_str().unwrap()
     }
@@ -83,7 +83,7 @@ impl<'a> NBest<'a> {
         NBest { raw: raw, _marker: std::marker::PhantomData }
     }
 
-    pub fn hyp(&self) -> (&str, i32) {
+    pub fn hyp(&self) -> (&'a str, i32) {
         let mut score: i32 = 0;
         let c_hyp = unsafe { bindings::ps_nbest_hyp(self.raw, &mut score) };
         if c_hyp.is_null() {
@@ -93,7 +93,7 @@ impl<'a> NBest<'a> {
         }
     }
 
-    pub fn segments(&self) -> (SegIter, i32) {
+    pub fn segments(&self) -> (SegIter<'a>, i32) {
         let mut score: i32 = 0;
         let seg_raw = unsafe { bindings::ps_nbest_seg(self.raw, &mut score) };
         (SegIter::new(seg_raw), score)
