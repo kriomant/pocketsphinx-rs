@@ -18,11 +18,6 @@ mod error;
 
 pub struct CmdLn {
     raw: *mut bindings::cmd_ln_t,
-
-    // Holds argument strings because Sphinx doesn't copy them and
-    // assumes they are valid as long as `cmd_ln_t` is alive.
-    #[allow(dead_code)]
-    args: Vec<CString>,
 }
 
 impl CmdLn {
@@ -41,7 +36,41 @@ impl CmdLn {
         if raw.is_null() {
             return Err(Error);
         }
-        Ok(CmdLn{raw: raw, args: c_args})
+        Ok(CmdLn{raw: raw})
+    }
+
+    pub unsafe fn get_str(&self, name: &str) -> &str {
+        let c_str = bindings::cmd_ln_str_r(self.raw, CString::new(name).unwrap().as_ptr());
+        CStr::from_ptr(c_str).to_str().unwrap()
+    }
+
+    pub unsafe fn get_int(&self, name: &str) -> i64 {
+        bindings::cmd_ln_int_r(self.raw, CString::new(name).unwrap().as_ptr())
+    }
+
+    pub unsafe fn get_float(&self, name: &str) -> f64 {
+        bindings::cmd_ln_float_r(self.raw, CString::new(name).unwrap().as_ptr())
+    }
+
+    pub fn exists(&self, name: &str) -> bool {
+        let res = unsafe { bindings::cmd_ln_exists_r(self.raw, CString::new(name).unwrap().as_ptr()) };
+        res != 0
+    }
+
+    pub unsafe fn get_boolean(&self, name: &str) -> bool {
+        self.get_int(name) != 0
+    }
+
+    pub unsafe fn get_int32(&self, name: &str) -> i32 {
+        self.get_int(name) as i32
+    }
+
+    pub unsafe fn get_float32(&self, name: &str) -> f32 {
+        self.get_float(name) as f32
+    }
+
+    pub unsafe fn get_float64(&self, name: &str) -> f64 {
+        self.get_float(name) as f64
     }
 
     fn into_raw(mut self) -> *mut bindings::cmd_ln_t {
@@ -57,6 +86,7 @@ impl Drop for CmdLn {
         }
     }
 }
+
 
 pub struct PsDecoder {
     raw: *mut bindings::ps_decoder_t,
@@ -122,6 +152,10 @@ impl PsDecoder {
 
     pub fn get_prob(&self) -> i32 {
         unsafe { bindings::ps_get_prob(self.raw) }
+    }
+
+    pub fn get_n_frames(&self) -> i32 {
+        unsafe { bindings::ps_get_n_frames(self.raw) }
     }
 
     pub fn nbest(&self, start_frame: i32, end_frame: i32,
