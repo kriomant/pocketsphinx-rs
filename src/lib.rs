@@ -76,8 +76,7 @@ impl CmdLn {
 impl Drop for CmdLn {
     fn drop(&mut self) {
         if !self.raw.is_null() {
-            let ref_count = unsafe { bindings::cmd_ln_free_r(self.raw) };
-            assert!(ref_count == 0);
+            unsafe { bindings::cmd_ln_free_r(self.raw) };
         }
     }
 }
@@ -85,15 +84,13 @@ impl Drop for CmdLn {
 
 pub struct PsDecoder {
     raw: *mut bindings::ps_decoder_t,
-    #[allow(dead_code)]
-    config: CmdLn,
 }
 
 impl PsDecoder {
     pub fn init(config: CmdLn) -> Self {
         let raw = unsafe { bindings::ps_init(config.raw) };
         assert!(!raw.is_null());
-        PsDecoder{raw: raw, config: config}
+        PsDecoder{raw: raw}
     }
 
     pub fn start_utt(&self, utt_id: Option<&str>) -> Result<()>  {
