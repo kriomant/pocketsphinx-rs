@@ -3,7 +3,6 @@ extern crate pocketsphinx_sys as bindings;
 
 use std::ptr;
 use std::ffi::{CStr, CString};
-use std::mem;
 use libc::c_char;
 
 pub use search::*;
@@ -72,17 +71,12 @@ impl CmdLn {
     pub unsafe fn get_float64(&self, name: &str) -> f64 {
         self.get_float(name) as f64
     }
-
-    fn into_raw(mut self) -> *mut bindings::cmd_ln_t {
-        mem::replace(&mut self.raw, ptr::null_mut())
-    }
 }
 
 impl Drop for CmdLn {
     fn drop(&mut self) {
         if !self.raw.is_null() {
-            let ref_count = unsafe { bindings::cmd_ln_free_r(self.raw) };
-            assert!(ref_count == 0);
+            unsafe { bindings::cmd_ln_free_r(self.raw) };
         }
     }
 }
@@ -94,7 +88,7 @@ pub struct PsDecoder {
 
 impl PsDecoder {
     pub fn init(config: CmdLn) -> Self {
-        let raw = unsafe { bindings::ps_init(config.into_raw()) };
+        let raw = unsafe { bindings::ps_init(config.raw) };
         assert!(!raw.is_null());
         PsDecoder{raw: raw}
     }
